@@ -67,19 +67,21 @@ crashlytics-build.properties
 # ============================================================
 #  Third-party extracted assets
 # ============================================================
-# The extracted FBX/PNG set was moved out of the project into an external
-# quarantine. These patterns are a safety net so that a future accidental
-# re-import of that third-party content cannot be committed.
+# The extracted FBX/PNG set has been moved out of the project into an
+# external quarantine, so the eight model folders no longer contain any
+# third-party content. They are normal project locations again and future
+# self-made or licensed models MUST be tracked there.
 #
-# NOTE: the *Materials* folders inside these paths are original project
-# assets and must stay tracked, so only model/texture extensions are ignored.
-/Assets/_Project/Art/Environment/Props/Rocks/*.fbx
-/Assets/_Project/Art/Environment/Props/Containers/*.fbx
-/Assets/_Project/Art/Environment/Props/Furniture/*.fbx
-/Assets/_Project/Art/Environment/Props/Vehicles/*.fbx
-/Assets/_Project/Art/Environment/Props/Weapons/*.fbx
-/Assets/_Project/Art/Environment/Vegetation/*.fbx
-/Assets/_Project/Art/Environment/Buildings/*.fbx
-/Assets/_Project/Art/Characters/*.fbx
-/Assets/_Project/Art/Textures/Extracted/*.png
+# IMPORTANT - do not re-add a blanket "*.fbx" rule for these folders.
+# A blanket rule makes a model show up in Unity while silently staying out
+# of version control, so a fresh clone on another machine would be missing
+# every model. If a specific third-party file ever has to be excluded,
+# list that exact file name instead of the extension.
+#
+# The only location kept isolated is the dedicated extracted-texture dump,
+# which exists purely for third-party source images. Nothing inside it is
+# meant to be committed, including the .meta files (otherwise a re-import
+# would leave orphan .meta entries in the repository).
+/Assets/_Project/Art/Textures/Extracted/*
 /Assets/_Project/Art/Textures/Extracted_manifest.json
+/Assets/_Project/Art/Textures/Extracted_manifest.json.meta
