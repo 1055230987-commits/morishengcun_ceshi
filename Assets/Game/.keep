@@ -1,0 +1,5 @@
+# Game
+
+原型阶段的游戏脚本目录。当前只实现了第一阶段：**Player / Camera / World(Area+Boundary) / 灰盒场景**。
+
+结构说明、Inspector 配置与测试步骤见 [README_原型说明.md](./README_原型说明.md)。

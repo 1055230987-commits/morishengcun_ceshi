@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_Water_Lake
+  m_Shader: {fileID: 4800000, guid: 4caca2a873ccba740aa182112230d00d, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _CausticsTex:
+        m_Texture: {fileID: 2800000, guid: abe194644b7cd6d478316a3527f5fe14, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FoamNoiseTex:
+        m_Texture: {fileID: 2800000, guid: e91a2ca67b7ab0a4ea359aab8586753a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GlintTex:
+        m_Texture: {fileID: 2800000, guid: 665bb0ccb40604f49870c37def918551, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 9dea1b6328b9816408a2a6b27d1c195b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AmplitudeScale: 0.35
+    - _CausticsIntensity: 0.02
+    - _CausticsRange: 7.05
+    - _CausticsScale: 3.2
+    - _CausticsSpeed: 0.25
+    - _CausticsTiling: 0.3
+    - _ChromaticAberration: 0.35
+    - _CrestFoamStrength: 1.6
+    - _CrestFoamThreshold: 0.55
+    - _DeepRange: 4
+    - _DepthFade: 3
+    - _EdgeErosion: 0.35
+    - _FoamDissolve: 0.25
+    - _FoamDistance: 2.496
+    - _FoamNoiseSpeed: 0.03
+    - _FoamNoiseTiling: 0.35
+    - _FoamPushPull: 0.25
+    - _FoamThickness: 0.35
+    - _FoamWaveFrequency: 2
+    - _FoamWaveSpeed: 1.4
+    - _FresnelPower: 4
+    - _GlintScale: 4
+    - _GlintStrength: 1.4
+    - _GlintThreshold: 0.55
+    - _GlowIntensity: 1
+    - _NormalScale: 1
+    - _RefractStrength: 0.012
+    - _RippleScale: 9
+    - _RippleSpeed: 0.35
+    - _RippleStrength: 0.28
+    - _SSSDistortion: 0.35
+    - _SSSIntensity: 1.2
+    - _SSSPower: 8
+    - _Smoothness: 1
+    - _SpecularIntensity: 1.6
+    - _WaveSpeed: 1
+    m_Colors:
+    - _CausticsColor: {r: 1, g: 1, b: 1, a: 1}
+    - _DeepColor: {r: 0.02, g: 0.09, b: 0.16, a: 0.97}
+    - _FoamColor: {r: 0.92, g: 0.96, b: 1, a: 1}
+    - _FresnelColor: {r: 0.75, g: 0.88, b: 0.98, a: 1}
+    - _NormalSpeed: {r: 0.02, g: 0.015, b: -0.015, a: 0.025}
+    - _SSSColor: {r: 0.34999996, g: 0.85, b: 0.68, a: 1}
+    - _ShallowColor: {r: 0.16, g: 0.42, b: 0.45, a: 0.62}
+    - _WaveA: {r: 1, g: 0.35, b: 0.22, a: 6}
+    - _WaveB: {r: -0.6, g: 0.8, b: 0.16, a: 3.6}
+    - _WaveC: {r: 0.25, g: -1, b: 0.11, a: 2.2}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

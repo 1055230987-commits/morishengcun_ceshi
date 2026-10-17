@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 881421fabec625e438534be249510c71, type: 3}
+  m_Name: DA_Area_Prototype
+  m_EditorClassIdentifier: 
+  _mapId: prototype
+  _displayName: "\u7070\u76D2\u539F\u578B\u5730\u56FE"
+  _sizeXZ: {x: 60, y: 60}
+  _walkableInset: 0.6
+  _floorCount: 1
+  _lowestFloorIndex: 0
+  _defaultSpawnPosition: {x: 0, y: 0.1, z: -4}
+  _defaultSpawnYaw: 0
