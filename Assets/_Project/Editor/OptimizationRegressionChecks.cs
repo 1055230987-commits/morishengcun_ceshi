@@ -249,7 +249,11 @@ namespace Game.EditorTools
                 foreach (InteractionProbe probe in root.GetComponentsInChildren<InteractionProbe>(true))
                     Assert(probe.InteractableMask.value == 256, "Incorrect interaction mask");
             }
-            Assert(targets == 23, "Unexpected interactable count");
+            // 场景中的 InteractableBase 共 31 个：
+            //   树 20 + 箱子 3 + 路灯 3 + 楼层过渡 2 + 训练木桩 3
+            // 旧常量 23（= 树 + 箱子）在加入路灯、楼层过渡与木桩后未同步，
+            // 于 2026-10-18 更正为实际值。
+            Assert(targets == 31, "Unexpected interactable count");
             Assert(EditorBuildSettings.scenes.Length > 0 &&
                 EditorBuildSettings.scenes[0].path == GreyboxLevelBuilder.ScenePath &&
                 EditorBuildSettings.scenes[0].enabled, "Incorrect startup scene");
