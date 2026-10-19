@@ -2063,7 +2063,7 @@ Transform:
   m_GameObject: {fileID: 68663531}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.45, y: 1.05, z: 0}
+  m_LocalPosition: {x: -0, y: 1.05, z: 0.404}
   m_LocalScale: {x: 0.9, y: 2.1, z: 0.12}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5369,6 +5369,11 @@ MonoBehaviour:
     - Item: {fileID: 11400000, guid: 27ddebd626ed51748bf6efa87204348d, type: 2}
       Amount: 2
     _capacity: 4
+  _equipmentSlots: []
+  _equipment:
+    _slots: []
+    _capacity: 0
+    _definitions: []
 --- !u!114 &125072453
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20763,6 +20768,70 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 618214208}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &618925044
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 618925046}
+  - component: {fileID: 618925045}
+  m_Layer: 0
+  m_Name: "\u654C\u4EBA\u5BFC\u822A\u7F51\u683C"
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &618925045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618925044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: -1372625422
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 1
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 1
+  m_VoxelSize: 0.1
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: 039ed4347c2f3f14daefc3b32c9791c5, type: 2}
+  m_BuildHeightMesh: 0
+--- !u!4 &618925046
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618925044}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &622137785
 GameObject:
   m_ObjectHideFlags: 0
@@ -38817,12 +38886,19 @@ MonoBehaviour:
   - {fileID: 755976321}
   _patrolReachDistance: 0.8
   _patrolWaitTime: 1.5
-  _viewDistance: 14
-  _viewAngle: 140
+  _aggroRadius: 14
+  _showAggroRange: 1
   _loseTargetGrace: 3
   _patrolSpeed: 1.6
   _chaseSpeed: 4.2
   _turnSpeed: 540
+  _useNavMesh: 1
+  _avoidObstacles: 1
+  _avoidLookAheadDistance: 2.6
+  _avoidReactionSeconds: 0.35
+  _avoidProbeHeight: 0.9
+  _separationRadius: 1.8
+  _separationStrength: 0.9
   _attackRange: 1.6
   _attackDamage: 10
   _attackInterval: 1.2
@@ -38840,6 +38916,8 @@ MonoBehaviour:
   _visualPrefabYaw: 0
   _visualPrefabScale: 1
   _logStateChanges: 0
+  _debugSteering: 0
+  _configVersion: 2
 --- !u!143 &1219414159
 CharacterController:
   m_ObjectHideFlags: 0
@@ -47885,12 +47963,19 @@ MonoBehaviour:
   - {fileID: 666053799}
   _patrolReachDistance: 0.8
   _patrolWaitTime: 1.5
-  _viewDistance: 14
-  _viewAngle: 140
+  _aggroRadius: 14
+  _showAggroRange: 1
   _loseTargetGrace: 3
   _patrolSpeed: 1.6
   _chaseSpeed: 4.2
   _turnSpeed: 540
+  _useNavMesh: 1
+  _avoidObstacles: 1
+  _avoidLookAheadDistance: 2.6
+  _avoidReactionSeconds: 0.35
+  _avoidProbeHeight: 0.9
+  _separationRadius: 1.8
+  _separationStrength: 0.9
   _attackRange: 1.6
   _attackDamage: 10
   _attackInterval: 1.2
@@ -47908,6 +47993,8 @@ MonoBehaviour:
   _visualPrefabYaw: 0
   _visualPrefabScale: 1
   _logStateChanges: 0
+  _debugSteering: 0
+  _configVersion: 2
 --- !u!143 &1538196613
 CharacterController:
   m_ObjectHideFlags: 0
@@ -48458,12 +48545,19 @@ MonoBehaviour:
   - {fileID: 1470800480}
   _patrolReachDistance: 0.8
   _patrolWaitTime: 1.5
-  _viewDistance: 14
-  _viewAngle: 140
+  _aggroRadius: 14
+  _showAggroRange: 1
   _loseTargetGrace: 3
   _patrolSpeed: 1.6
   _chaseSpeed: 4.2
   _turnSpeed: 540
+  _useNavMesh: 1
+  _avoidObstacles: 1
+  _avoidLookAheadDistance: 2.6
+  _avoidReactionSeconds: 0.35
+  _avoidProbeHeight: 0.9
+  _separationRadius: 1.8
+  _separationStrength: 0.9
   _attackRange: 1.6
   _attackDamage: 10
   _attackInterval: 1.2
@@ -48481,6 +48575,8 @@ MonoBehaviour:
   _visualPrefabYaw: 0
   _visualPrefabScale: 1
   _logStateChanges: 0
+  _debugSteering: 0
+  _configVersion: 2
 --- !u!143 &1547004221
 CharacterController:
   m_ObjectHideFlags: 0
@@ -72156,3 +72252,4 @@ SceneRoots:
   - {fileID: 1083162047}
   - {fileID: 1120057970}
   - {fileID: 1278314043}
+  - {fileID: 618925046}
