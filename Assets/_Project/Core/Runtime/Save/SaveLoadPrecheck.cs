@@ -144,7 +144,7 @@ namespace Game.Save
             }
 
             // ---- 版本 ----
-            if (data.Version != GameSaveData.CurrentVersion)
+            if (data.Version < 1 || data.Version > GameSaveData.CurrentVersion)
             {
                 result.Add(
                     LoadIssueKind.VersionMismatch,
@@ -173,7 +173,8 @@ namespace Game.Save
             // 如果不查就继续，会把背包清空然后一个都放不回来。
             // 那比"拒绝加载"糟得多，所以这里直接阻断。
             bool anyItems = (data.Backpack != null && data.Backpack.Count > 0)
-                         || (data.Pocket != null && data.Pocket.Count > 0);
+                         || (data.Pocket != null && data.Pocket.Count > 0)
+                         || (data.Equipment != null && data.Equipment.Count > 0);
 
             if (anyItems && !platformSupportsItemLookup())
             {
@@ -187,6 +188,7 @@ namespace Game.Save
                 var reported = new HashSet<string>();
                 CheckItems(data.Backpack, "背包", hasItem, result, reported);
                 CheckItems(data.Pocket, "口袋", hasItem, result, reported);
+                CheckItems(data.Equipment, "装备", hasItem, result, reported);
             }
 
             // ---- 建造区 ----

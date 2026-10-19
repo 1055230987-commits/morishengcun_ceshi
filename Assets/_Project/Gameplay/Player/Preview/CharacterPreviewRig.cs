@@ -45,11 +45,7 @@ namespace Game.Player
                  "（早先默认 12，模型会自己慢慢转 —— 玩家反馈不想要自动旋转。）")]
         [SerializeField] private float _autoSpinSpeed = 0f;
 
-        [Tooltip("拖动灵敏度（度/像素）。\n" +
-                 "【为什么默认给 2.0 这么大】IMGUI 的 Event.delta 是「每帧鼠标位移」，\n" +
-                 "不是「这次拖动的总位移」—— 拖一下会收到很多条 MouseDrag，每条只有几像素。\n" +
-                 "所以要乘一个较大的系数，累积起来手感才顺。\n" +
-                 "参考：2.0 时拖动约 180 像素 ≈ 转一整圈。觉得太快调到 1.0，太慢调到 3.0。")]
+        [Tooltip("水平拖过整个预览区的旋转倍率；2 表示 360 度，不随窗口大小改变。")]
         [SerializeField, Range(0.1f, 8f)] private float _dragSensitivity = 2.0f;
 
         private Camera _camera;
@@ -59,11 +55,15 @@ namespace Game.Player
         private Light _light;
         private Light _fillLight;
         private float _yaw;
+        private float _targetYaw;
+        private bool _dragging;
         private bool _built;
         private readonly List<Material> _ownedMaterials = new List<Material>();
 
         /// <summary>预览需要重渲染（由旋转/拖动打标记，LateUpdate 统一处理）。</summary>
         private bool _dirty;
+        private readonly UniversalRenderPipeline.SingleCameraRequest _renderRequest =
+            new UniversalRenderPipeline.SingleCameraRequest();
 
         /// <summary>预览贴图。UI 用它显示。</summary>
         public RenderTexture Texture => _renderTexture;
@@ -74,7 +74,7 @@ namespace Game.Player
         public float Yaw => _yaw;
 
         /// <summary>
-        /// 拖动灵敏度（度/像素），供界面读取。
+        /// 水平拖过整个预览区的旋转倍率（2 表示 360 度），供界面读取。
         ///
         /// 【为什么放在这里而不是界面里】灵敏度是"这个预览装置怎么转"的属性，
         /// 属于装置自己；界面只负责把鼠标位移交给 AddYaw。
@@ -95,8 +95,7 @@ namespace Game.Player
         ///
         /// 【为什么不能直接 Render()】
         /// 两条路都会走到这里，而两条路都不能同步渲染：
-        ///   1. 旋转由界面驱动：InventoryScreen.OnGUI → HandlePreviewDrag → AddYaw
-        ///      —— 这是 **IMGUI 事件回调**，时机不对。
+        ///   1. 旋转由界面的 Update 输入驱动，多次角度变化合并为一次渲染。
         ///   2. 建装置：OnEnable → Build → FrameCamera
         ///      —— 这是 **进入播放模式、管线尚未就绪**的窗口。
         ///      在这里渲染会让 Unity 过早构造渲染管线，而 VolumeManager 的默认体积
@@ -126,8 +125,7 @@ namespace Game.Player
 
             // 【硬保护 1】绝不在 IMGUI 事件回调里渲染。
             //
-            // 旋转是由界面驱动的（InventoryScreen.OnGUI → HandlePreviewDrag → AddYaw），
-            // 所以调用链有可能落在 GUI 事件里。那种时机同步渲染会和编辑器/URP 的
+            // 编辑器工具仍可能从 GUI 事件调用此方法。那种时机同步渲染会和编辑器/URP 的
             // 管线状态机打架。这里直接拒绝，交给 LateUpdate。
             if (Event.current != null && Event.current.type != EventType.Layout &&
                 Event.current.type != EventType.Repaint)
@@ -152,8 +150,10 @@ namespace Game.Player
                 return;
             }
 
-            // 相机被禁用时 Render() 仍可手动调用；渲染结果进 targetTexture。
-            _camera.Render();
+            // 使用 URP 支持的单相机渲染请求，结果写入预览贴图。
+            _renderRequest.destination = _renderTexture;
+            if (!RenderPipeline.SupportsRenderRequest(_camera, _renderRequest)) return;
+            RenderPipeline.SubmitRenderRequest(_camera, _renderRequest);
             _dirty = false;
         }
 
@@ -268,7 +268,7 @@ namespace Game.Player
             _character = null;
             _light = null;
             _fillLight = null;
-            _yaw = 0f;
+            _yaw = _targetYaw = 0f;
             _built = false;
 
             // ---- 4) 从零重建 ----
@@ -347,7 +347,7 @@ namespace Game.Player
             CopyRenderableHierarchy(source.transform, clone.transform);
 
             _character = clone.transform;
-            _yaw = 0f;
+            _yaw = _targetYaw = 0f;
 
             ApplyYaw();
             FrameCamera();
@@ -513,8 +513,8 @@ namespace Game.Player
             // 用旧的 UnityEngine.Input 类会直接抛 InvalidOperationException（本工程踩过）。
             if (Mathf.Abs(_autoSpinSpeed) <= 0.001f) return;
 
-            _yaw += _autoSpinSpeed * Time.deltaTime;
-            ApplyYaw();   // 内部只会打脏标记
+            if (_dragging) return;
+            _targetYaw += _autoSpinSpeed * Time.deltaTime;
         }
 
         /// <summary>
@@ -526,6 +526,7 @@ namespace Game.Player
         /// </summary>
         private void LateUpdate()
         {
+            if (Application.isPlaying) AdvanceRotation(Time.unscaledDeltaTime);
             if (!_dirty) return;
 
             // 编辑模式下也允许刷新（ExecuteAlways），这样重置装置后立刻能看到结果。
@@ -546,7 +547,20 @@ namespace Game.Player
         /// <summary>由 UI 调用：直接旋转一个角度（拖动或滚轮）。</summary>
         public void AddYaw(float degrees)
         {
-            _yaw += degrees;
+            _targetYaw += degrees;
+            if (!Application.isPlaying) { _yaw = _targetYaw; ApplyYaw(); }
+            else MarkDirty();
+        }
+
+        public void SetDragging(bool dragging) => _dragging = dragging;
+
+        private void AdvanceRotation(float deltaTime)
+        {
+            float factor = 1f - Mathf.Exp(-28f * Mathf.Max(0f, deltaTime));
+            float next = Mathf.Lerp(_yaw, _targetYaw, factor);
+            if (Mathf.Abs(next - _targetYaw) < 0.01f) next = _targetYaw;
+            if (Mathf.Approximately(next, _yaw)) return;
+            _yaw = next;
             ApplyYaw();
         }
 

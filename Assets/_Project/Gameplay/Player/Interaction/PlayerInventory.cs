@@ -27,6 +27,45 @@ namespace Game.Player
         // 那个临时实例会被丢掉，白分配一个。真正的兜底在下面的属性里。
         [SerializeField] private Inventory _backpack;
         [SerializeField] private Inventory _pocket;
+        [Header("装备槽（留空使用帽子、衣服、裤子、鞋子；新增槽填写唯一 SlotId）")]
+        [SerializeField] private System.Collections.Generic.List<EquipmentSlot> _equipmentSlots;
+        [SerializeField, HideInInspector] private EquipmentInventory _equipment;
+
+        public EquipmentInventory Equipment
+        {
+            get
+            {
+                if (_equipment == null || _equipment.Definitions == null || _equipment.Definitions.Count == 0)
+                {
+                    if (_equipmentSlots == null || _equipmentSlots.Count == 0)
+                        _equipmentSlots = new System.Collections.Generic.List<EquipmentSlot>
+                        {
+                            new EquipmentSlot("head", "帽子", Resources.Load<EquipmentType>("EquipmentTypes/Head")),
+                            new EquipmentSlot("torso", "衣服", Resources.Load<EquipmentType>("EquipmentTypes/Torso")),
+                            new EquipmentSlot("legs", "裤子", Resources.Load<EquipmentType>("EquipmentTypes/Legs")),
+                            new EquipmentSlot("feet", "鞋子", Resources.Load<EquipmentType>("EquipmentTypes/Feet")),
+                        };
+                    _equipment = new EquipmentInventory(_equipmentSlots);
+                }
+                return _equipment;
+            }
+        }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            // 编辑配置后重建空的运行时缓存；Play 中的装备不受 Inspector 刷新影响。
+            if (!Application.isPlaying && (_equipment == null || _equipment.IsEmpty)) _equipment = null;
+        }
+
+        public void UseDefaultEquipmentSlots()
+        {
+            if (Application.isPlaying) return;
+            _equipmentSlots = null;
+            _equipment = null;
+            _ = Equipment;
+        }
+#endif
 
         /// <summary>背包（4×4）。采集产出默认进这里。</summary>
         public Inventory Backpack

@@ -30,20 +30,27 @@ namespace Game.Items
         [Header("显示（暂时可以留空）")]
         [SerializeField] private Sprite _icon;
 
+        [Header("装备（普通物品留空）")]
+        [Tooltip("只有对应类型的装备槽才能接收。新增装备类型可创建新的类型资产。")]
+        [SerializeField] private EquipmentType _equipmentType;
+
         public string ItemId => _itemId;
         public string DisplayName => _displayName;
         public string Description => _description;
-        public int MaxStackSize => Mathf.Max(1, _maxStackSize);
+        public int MaxStackSize => _equipmentType != null ? 1 : Mathf.Max(1, _maxStackSize);
+        public EquipmentType EquipmentType => _equipmentType;
         public Sprite Icon => _icon;
 
         /// <summary>编辑器/调试用：直接造一个内存里的临时物品定义，方便测试，不要用于正式内容。</summary>
-        public static ItemDefinition CreateRuntime(string itemId, string displayName, int maxStackSize = 99)
+        public static ItemDefinition CreateRuntime(string itemId, string displayName, int maxStackSize = 99,
+            EquipmentType equipmentType = null)
         {
             ItemDefinition definition = CreateInstance<ItemDefinition>();
             definition.name = $"Item_{itemId}";
             definition._itemId = itemId;
             definition._displayName = displayName;
             definition._maxStackSize = Mathf.Max(1, maxStackSize);
+            definition._equipmentType = equipmentType;
             return definition;
         }
 

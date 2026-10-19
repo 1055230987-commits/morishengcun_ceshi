@@ -232,6 +232,7 @@ namespace Game.Save
                 Player = CapturePlayer(),
                 Backpack = CaptureInventory(_inventory != null ? _inventory.Backpack : null),
                 Pocket = CaptureInventory(_inventory != null ? _inventory.Pocket : null),
+                Equipment = CaptureInventory(_inventory != null ? _inventory.Equipment : null),
                 PlacedParts = CapturePlacedParts(),
             };
 
@@ -264,23 +265,7 @@ namespace Game.Save
         /// 【为什么存 ItemId 而不是资产引用】资产路径/引用会随工程结构变化，
         /// 而 ItemId 是刻意设计的稳定标识（ItemDefinition 里写着"存档只认这个"）。
         /// </summary>
-        private static List<ItemSaveData> CaptureInventory(Inventory? inventory)
-        {
-            var result = new List<ItemSaveData>();
-            if (inventory == null) return result;
-
-            IReadOnlyList<ItemStack> slots = inventory.SlotsView;
-
-            for (int i = 0; i < slots.Count; i++)
-            {
-                ItemStack slot = slots[i];
-                if (slot.IsEmpty || slot.Item == null) continue;
-
-                result.Add(new ItemSaveData(slot.Item.ItemId, slot.Amount));
-            }
-
-            return result;
-        }
+        private static List<ItemSaveData> CaptureInventory(Inventory? inventory) => InventorySaveCodec.Capture(inventory);
 
         /// <summary>
         /// 采集所有建造物。
@@ -483,7 +468,19 @@ namespace Game.Save
                     blocking: true);
             }
 
+            if (data != null && _restoreInventory && _inventory != null)
+            {
+                CheckContainer(_inventory.Backpack, data.Backpack, "背包");
+                CheckContainer(_inventory.Pocket, data.Pocket, "口袋");
+                CheckContainer(_inventory.Equipment, data.Equipment, "装备");
+            }
             return precheck;
+
+            void CheckContainer(Inventory inventory, List<ItemSaveData>? records, string name)
+            {
+                if (!InventorySaveCodec.TryDecode(inventory, records, data.Version, FindItemDefinition, out _, out string error))
+                    precheck.Add(LoadIssueKind.Corrupt, name + "：" + error, blocking: true);
+            }
         }
 
         /// <summary>
@@ -528,39 +525,17 @@ namespace Game.Save
         {
             if (_inventory == null) return;
 
-            _inventory.Backpack.Clear();
-            _inventory.Pocket.Clear();
-
-            RestoreInto(_inventory.Backpack, data.Backpack);
-            RestoreInto(_inventory.Pocket, data.Pocket);
-        }
-
-        /// <summary>把记录的物品放回容器，并报告放不下的情况。</summary>
-        private static void RestoreInto(Inventory container, List<ItemSaveData>? items)
-        {
-            if (items == null) return;
-
-            foreach (ItemSaveData item in items)
-            {
-                if (item == null || string.IsNullOrEmpty(item.ItemId) || item.Amount <= 0) continue;
-
-                ItemDefinition? definition = FindItemDefinition(item.ItemId);
-
-                if (definition == null)
-                {
-                    Debug.LogWarning($"[存档] 找不到物品「{item.ItemId}」（{item.Amount} 个），已跳过。" +
-                                     "通常是物品资产被改名或删除了。");
-                    continue;
-                }
-
-                int added = container.Add(definition, item.Amount);
-
-                if (added < item.Amount)
-                {
-                    Debug.LogWarning($"[存档] 「{definition.DisplayName}」只放回了 {added}/{item.Amount} 个" +
-                                     "（容器装不下）。超出的部分丢失。");
-                }
-            }
+            // 三个容器全部验证成功才提交；错误装备或坏格子不能先清空当前物品。
+            if (!InventorySaveCodec.TryDecode(_inventory.Backpack, data.Backpack, data.Version, FindItemDefinition,
+                    out var backpack, out string error) ||
+                !InventorySaveCodec.TryDecode(_inventory.Pocket, data.Pocket, data.Version, FindItemDefinition,
+                    out var pocket, out error) ||
+                !InventorySaveCodec.TryDecode(_inventory.Equipment, data.Equipment, data.Version, FindItemDefinition,
+                    out var equipment, out error))
+                throw new System.InvalidOperationException("背包恢复被拒绝：" + error);
+            _inventory.Backpack.ReplaceSlots(backpack);
+            _inventory.Pocket.ReplaceSlots(pocket);
+            _inventory.Equipment.ReplaceSlots(equipment);
         }
 
         /// <summary>

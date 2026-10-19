@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32e94ae13a963014ab395029d48aa377, type: 3}
+  m_Name: DA_Item_Basic_Head
+  m_EditorClassIdentifier: Game.Runtime::Game.Items.ItemDefinition
+  _itemId: basic_hat
+  _displayName: 基础帽子
+  _description: 只能放入对应的装备槽。
+  _maxStackSize: 1
+  _icon: {fileID: 0}
+  _equipmentType: {fileID: 11400000, guid: d24ccd9509ee4cac9d5c3601615048f5, type: 2}
+

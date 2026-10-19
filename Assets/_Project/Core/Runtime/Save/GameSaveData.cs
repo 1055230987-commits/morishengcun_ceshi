@@ -27,7 +27,7 @@ namespace Game.Save
         /// <summary>存档格式版本。以后改结构时用它做兼容判断。</summary>
         public int Version = CurrentVersion;
 
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
 
         /// <summary>存档对应的地图 ID。加载时如果和当前地图不一致，要警告。</summary>
         public string MapId = string.Empty;
@@ -44,6 +44,7 @@ namespace Game.Save
         /// <summary>背包与口袋的物品。</summary>
         public List<ItemSaveData> Backpack = new List<ItemSaveData>();
         public List<ItemSaveData> Pocket = new List<ItemSaveData>();
+        public List<ItemSaveData> Equipment = new List<ItemSaveData>();
 
         /// <summary>所有已放置的建造物。</summary>
         public List<PlacedPartSaveData> PlacedParts = new List<PlacedPartSaveData>();
@@ -72,13 +73,17 @@ namespace Game.Save
         public string ItemId = string.Empty;
 
         public int Amount;
+        public int SlotIndex = -1;
+        public string SlotId = string.Empty;
 
         public ItemSaveData() { }
 
-        public ItemSaveData(string itemId, int amount)
+        public ItemSaveData(string itemId, int amount, int slotIndex = -1, string slotId = "")
         {
             ItemId = itemId;
             Amount = amount;
+            SlotIndex = slotIndex;
+            SlotId = slotId;
         }
     }
 
