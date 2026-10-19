@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!--
+      被测试的工程代码没有开 #nullable（只有少数几个文件开了），
+      在这个测试工程里会因为 Nullable=enable 而报一堆 CS8618/CS8625 等可空警告。
+      那些不是缺陷，只是两个工程的可空设置不同 —— 抑制掉，让真实错误更显眼。
+    -->
+    <NoWarn>$(NoWarn);CS8618;CS8625;CS0649;CS8632</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    编译的是【工程里的真实源码】，不是副本。
+    这样一旦真实实现改了行为，断言会跟着变 —— 这是这套测试有意义的前提。
+
+    ItemDefinition 也是真源码；UnityEngine 的框架类型（SerializeField /
+    ScriptableObject / Object.CreateInstance）由 TestStubs 下的替代品提供，
+    因为 dotnet run 加载不了 UnityEngine.CoreModule.dll 的本地运行时依赖。
+    替代的边界和一致性保证写在那个桩文件的注释里。
+  -->
+  <ItemGroup>
+    <Compile Include="../../Assets/_Project/Gameplay/Player/Movement/StairSnapLogic.cs" Link="StairSnapLogic.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/Player/Health/Health.cs" Link="Health.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/Building/GridConnectivity.cs" Link="GridConnectivity.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/Building/BuildEdge.cs" Link="BuildEdge.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/Building/BuildAreaData.cs" Link="BuildAreaData.cs" />
+    <Compile Include="../../Assets/_Project/Core/Runtime/Save/GameSaveData.cs" Link="GameSaveData.cs" />
+    <Compile Include="../../Assets/_Project/Core/Runtime/Save/SaveLoadPrecheck.cs" Link="SaveLoadPrecheck.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/AI/EnemyBrainLogic.cs" Link="EnemyBrainLogic.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/Player/Input/InputModeState.cs" Link="InputModeState.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/AI/EnemySteering.cs" Link="EnemySteering.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/Items/Definitions/ItemDefinition.cs" Link="ItemDefinition.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/Items/Definitions/EquipmentType.cs" Link="EquipmentType.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/Items/Runtime/EquipmentInventory.cs" Link="EquipmentInventory.cs" />
+    <Compile Include="../../Assets/_Project/Core/Runtime/Save/InventorySaveCodec.cs" Link="InventorySaveCodec.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/Items/Runtime/ItemStack.cs" Link="ItemStack.cs" />
+    <Compile Include="../../Assets/_Project/Gameplay/Items/Runtime/Inventory.cs" Link="Inventory.cs" />
+  </ItemGroup>
+</Project>
