@@ -72,6 +72,8 @@ namespace Game.Player
             // 所以这里必须显式构造，不能指望字段初始化。
             _health = new Health(_maxHealth);
             _health.Died += HandleDied;
+            // 旧场景也自动接入死亡界面，不要求重建玩家或灰盒。
+            if (GetComponent<PlayerDeathScreen>() == null) gameObject.AddComponent<PlayerDeathScreen>();
         }
 
         private void OnDestroy()
@@ -81,7 +83,7 @@ namespace Game.Player
 
         private void Update()
         {
-            if (!_debugKeys) return;
+            if (!_debugKeys || IsDead) return;
 
             // 用键盘直接测，不需要先做出一套伤害来源。
             // 读键走 Input System（本工程禁用了旧 UnityEngine.Input，读它会抛异常）。
@@ -158,11 +160,11 @@ namespace Game.Player
         }
 
         /// <summary>复活并回满血。</summary>
-        public void Revive()
+        public void Revive(float invulnerabilitySeconds = 3f)
         {
             if (_health == null) return;
             _health.Revive();
-            _invulnerableUntil = Time.time + Mathf.Max(_invulnerableTime, 1f);   // 复活给一点无敌
+            _invulnerableUntil = Time.time + Mathf.Max(_invulnerableTime, invulnerabilitySeconds);
         }
 
         [Tooltip("打开后打印每次受伤/回复。")]

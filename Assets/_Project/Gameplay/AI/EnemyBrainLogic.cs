@@ -316,6 +316,13 @@ namespace Game.AI
     /// </summary>
     public static class EnemyPerception
     {
+        /// <summary>水平圆形仇恨范围，不依赖朝向；攻击遮挡由控制器另行检查。</summary>
+        public static bool IsInAggroRange(float deltaX, float deltaZ, float radius)
+        {
+            if (!(radius > 0f) || float.IsInfinity(radius)) return false;
+            return deltaX * deltaX + deltaZ * deltaZ <= radius * radius;
+        }
+
         /// <summary>
         /// 玩家是否在视野内。
         ///

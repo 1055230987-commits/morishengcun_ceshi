@@ -573,6 +573,21 @@ namespace Game.EditorTools
         };
 
         /// <summary>
+        /// 去掉某个外观方块自带的碰撞体。
+        ///
+        /// 用 GameObject.CreatePrimitive 造出来的方块一定带 BoxCollider，
+        /// 而敌人的碰撞应该只由 CharacterController 提供。
+        /// </summary>
+        private static void DestroyBodyColliders(GameObject target)
+        {
+            if (target == null) return;
+
+            Collider collider = target.GetComponent<Collider>();
+
+            if (collider != null) Object.DestroyImmediate(collider);
+        }
+
+        /// <summary>
         /// 生成会巡逻、会发现玩家、会追、会打的敌人。
         ///
         /// 【外观】程序化生成的方块（暗红身体 + 头 + 双臂），和木桩同风格。
@@ -594,25 +609,43 @@ namespace Game.EditorTools
 
                 // ---- 外观：身体 + 头 + 两条手臂 ----
                 // 尺寸参考木桩（高约 1.8 米），但更"人形"一点，方便一眼区分。
-                Game.World.GreyboxPrimitives.CreateBlock($"{i}_身体", enemy,
+                GameObject body = Game.World.GreyboxPrimitives.CreateBlock($"{i}_身体", enemy,
                     new Vector3(0f, 0.95f, 0f),
                     new Vector3(0.62f, 1.25f, 0.40f),
                     palette.Trunk, BuildingObjectType, $"enemy/{i}/body");
 
-                Game.World.GreyboxPrimitives.CreateBlock($"{i}_头", enemy,
+                GameObject head = Game.World.GreyboxPrimitives.CreateBlock($"{i}_头", enemy,
                     new Vector3(0f, 1.78f, 0f),
                     new Vector3(0.42f, 0.42f, 0.42f),
                     palette.Rock, BuildingObjectType, $"enemy/{i}/head");
 
-                Game.World.GreyboxPrimitives.CreateBlock($"{i}_左臂", enemy,
+                GameObject armLeft = Game.World.GreyboxPrimitives.CreateBlock($"{i}_左臂", enemy,
                     new Vector3(-0.42f, 1.15f, 0.16f),
                     new Vector3(0.20f, 0.85f, 0.22f),
                     palette.Trunk, BuildingObjectType, $"enemy/{i}/arm_l");
 
-                Game.World.GreyboxPrimitives.CreateBlock($"{i}_右臂", enemy,
+                GameObject armRight = Game.World.GreyboxPrimitives.CreateBlock($"{i}_右臂", enemy,
                     new Vector3(0.42f, 1.15f, 0.16f),
                     new Vector3(0.20f, 0.85f, 0.22f),
                     palette.Trunk, BuildingObjectType, $"enemy/{i}/arm_r");
+
+                // ---- 【必须】去掉外观方块自带的碰撞体 ----
+                //
+                // 【为什么必须做 —— 这是一个真实的缺陷】
+                // GreyboxPrimitives.CreateBlock 用 GameObject.CreatePrimitive 创建方块，
+                // 那会【自动附加一个 BoxCollider】。于是每个敌人实际有
+                // 4 个 BoxCollider + 1 个 CharacterController，而敌人真正的碰撞体
+                // 只应该是后者。多出来的方块碰撞体带来两个问题：
+                //   1. 敌人的身体方块会和自己/墙/其它敌人发生物理碰撞，行为不可预测
+                //   2. 敌人死亡时只禁用 CharacterController，那 4 个 BoxCollider 还在，
+                //      于是活着的敌人探距时会探测到"一具尸体的碰撞体"并绕开它
+                //
+                // 去掉之后：敌人只有一个 CharacterController 作为碰撞体，
+                // 死亡禁用它 → 尸体不挡路、也不被探测。手枪仍然能打中（CharacterController 是 Collider）。
+                DestroyBodyColliders(body);
+                DestroyBodyColliders(head);
+                DestroyBodyColliders(armLeft);
+                DestroyBodyColliders(armRight);
 
                 // ---- 碰撞体 ----
                 // CharacterController 自己就是碰撞体，不需要额外加。
@@ -646,6 +679,12 @@ namespace Game.EditorTools
                     patrolPoints: points,
                     viewDistance: 14f,
                     attackDamage: 10f);
+
+                // 【必须显式写入避障配置】
+                // 不能依赖 EnemyController 里字段的初始值：生成器加完组件后，
+                // 只有【序列化到场景里的值】在下次加载时才会被还原。
+                // 不在这里写一遍，Inspector 里会看到 0/false，很难排查。
+                component.ConfigureAvoidanceDefaults();
             }
         }
 

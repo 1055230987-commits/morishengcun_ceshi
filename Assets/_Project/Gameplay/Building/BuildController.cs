@@ -451,6 +451,7 @@ namespace Game.Gameplay.Building
         /// </summary>
         private void HandleModeToggle()
         {
+            if (InputModeState.IsPlayerDead) return;
             if (_input == null) return;
 
             var keyboard = UnityEngine.InputSystem.Keyboard.current;
@@ -474,6 +475,7 @@ namespace Game.Gameplay.Building
 
         public void EnterBuilding()
         {
+            if (InputModeState.IsPlayerDead) return;
             _building = true;
             _placementActive = false;   // 交给 Update 里的状态比较去首次显示预览
             InputModeState.Current = InputMode.Building;
@@ -1154,6 +1156,33 @@ namespace Game.Gameplay.Building
                 GameObject created = Game.World.GreyboxPrimitives.CreateBlock(
                     $"玩家{part.DisplayName}", _spawnRoot, center, size,
                     material, "player_build", objectId);
+
+                // ---- 墙要让敌人的寻路绕开 ----
+                //
+                // 【为什么必须加】NavMesh 是【烘焙】出来的静态数据。
+                // 玩家在游戏里新建的墙不在烘焙结果里，敌人的路径会直接穿墙。
+                // NavMeshObstacle + carving 会在导航网格上实时挖洞，
+                // 让路径规划在 Carving 更新并重算路径后绕开新墙 —— 这正是"动态建墙"的正确处理方式
+                // （这也是为什么"能建墙"并不构成排除 NavMesh 的理由）。
+                //
+                // 只给【墙】加，不给地板加：地板是可以踩上去的，不该挡路。
+                if (isEdge)
+                {
+                    UnityEngine.AI.NavMeshObstacle obstacle =
+                        created.AddComponent<UnityEngine.AI.NavMeshObstacle>();
+
+                    obstacle.shape = UnityEngine.AI.NavMeshObstacleShape.Box;
+                    // CreateBlock 已缩放 Transform，Obstacle 使用局部坐标。
+                    BoxCollider wallCollider = created.GetComponent<BoxCollider>();
+                    obstacle.size = wallCollider != null ? wallCollider.size : Vector3.one;
+                    obstacle.center = wallCollider != null ? wallCollider.center : Vector3.zero;
+                    obstacle.carving = true;
+
+                    // 挖洞的延迟/间隔：默认值偏保守，墙是小物体，调快一点反应更及时
+                    obstacle.carveOnlyStationary = true;
+                    obstacle.carvingMoveThreshold = 0.1f;
+                    obstacle.carvingTimeToStationary = 0.05f;
+                }
 
                 return created;
             }
