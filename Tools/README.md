@@ -1,6 +1,6 @@
 # 工程辅助工具
 
-- 日常保存与上传：`Git/README.md`。在工程根目录双击 `保存项目到Git.cmd`。
+- 日常保存与上传：`Git/README.md`。工程根目录的 `仅保存到本地Git.cmd` 专门提交到本机；`保存项目到Git.cmd` 可以选择本地保存或上传。
 - 验证环境和当前工具：`Validation/README.md`。
 - 历史修复脚本与原始备注：`Validation/Archive/2026-10/`。保留原文及源码，供追溯；不是日常执行入口。
 
