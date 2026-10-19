@@ -29,6 +29,8 @@ namespace Game.Player
 
         /// <summary>界面打开（背包等）：不能移动、不能开枪、不能交互。</summary>
         Inventory = 2,
+        /// <summary>死亡画面；只有复活流程可以解除。</summary>
+        Dead = 3,
     }
 
     /// <summary>
@@ -48,36 +50,44 @@ namespace Game.Player
     public static class InputModeState
     {
         private static InputMode _current = InputMode.Normal;
+        private static bool _playerDead;
+        public static bool IsPlayerDead => _playerDead;
 
         /// <summary>当前模式。设置时如果值没变，不做任何事。</summary>
         public static InputMode Current
         {
-            get => _current;
-            set => _current = value;
+            get => _playerDead ? InputMode.Dead : _current;
+            set { if (!_playerDead) _current = value; }
         }
 
         /// <summary>角色能否移动。界面打开时不能。</summary>
-        public static bool AllowsMovement => _current != InputMode.Inventory;
+        public static bool AllowsMovement => Current == InputMode.Normal || Current == InputMode.Building;
 
         /// <summary>能否开枪。只有正常游玩时能。</summary>
-        public static bool AllowsCombat => _current == InputMode.Normal;
+        public static bool AllowsCombat => Current == InputMode.Normal;
 
         /// <summary>能否按 E 交互。只有正常游玩时能。</summary>
-        public static bool AllowsInteraction => _current == InputMode.Normal;
+        public static bool AllowsInteraction => Current == InputMode.Normal;
 
         /// <summary>能否放置/拆除建造物。只有建造模式能。</summary>
-        public static bool AllowsBuilding => _current == InputMode.Building;
+        public static bool AllowsBuilding => Current == InputMode.Building;
 
         /// <summary>
         /// 鼠标指针是否被建造系统占用。
         /// 建造模式下鼠标用于选格子，不该同时被相机拖拽之类的逻辑吃掉。
         /// </summary>
-        public static bool PointerUsedByBuilding => _current == InputMode.Building;
+        public static bool PointerUsedByBuilding => Current == InputMode.Building;
+
+        public static void SetPlayerDead(bool dead)
+        {
+            _playerDead = dead;
+            if (!dead) _current = InputMode.Normal;
+        }
 
         /// <summary>回到正常模式。场景重建、退出游戏时调。</summary>
         public static void Reset() => _current = InputMode.Normal;
 
         /// <summary>当前模式的名字（调试用）。静态类不能重写 ToString，所以用这个方法。</summary>
-        public static string Describe() => _current.ToString();
+        public static string Describe() => Current.ToString();
     }
 }
