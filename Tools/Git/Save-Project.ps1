@@ -146,6 +146,37 @@ function Check-PushTarget([string]$Branch) {
     Write-Host "上传目标：$($url.Text.Trim()) / $Branch"
 }
 
+function New-SaveNumber([switch]$IncludeRemote) {
+    $zone = [TimeZoneInfo]::FindSystemTimeZoneById('China Standard Time')
+    $day = [TimeZoneInfo]::ConvertTimeFromUtc([DateTime]::UtcNow, $zone).ToString('yyyy.MM.dd', [Globalization.CultureInfo]::InvariantCulture)
+    $pattern = '^' + [regex]::Escape($day) + '\.(\d{5})$'
+    $highest = 0
+    foreach ($tag in ((Git -GitArgs @('tag', '--list', "$day.*")).Text -split '\r?\n')) {
+        if ($tag -match $pattern) { $highest = [math]::Max($highest, [int]$Matches[1]) }
+    }
+    # Commit titles also retain the number, so deleting a tag does not silently reuse it.
+    $subjectPattern = '^\[(' + [regex]::Escape($day) + '\.(\d{5}))\] '
+    foreach ($subject in ((Git -GitArgs @('log', '--all', '--format=%s')).Text -split '\r?\n')) {
+        if ($subject -match $subjectPattern) { $highest = [math]::Max($highest, [int]$Matches[2]) }
+    }
+    if ($IncludeRemote) {
+        $remotePattern = '^refs/tags/' + [regex]::Escape($day) + '\.(\d{5})$'
+        foreach ($line in ((Git -GitArgs @('ls-remote', '--tags', '--refs', $Remote, "refs/tags/$day.*")).Text -split '\r?\n')) {
+            $reference = ($line -split '\s+')[-1]
+            if ($reference -match $remotePattern) { $highest = [math]::Max($highest, [int]$Matches[1]) }
+        }
+    }
+    if ($highest -ge 99999) { throw "今天的保存编号已用满（$day.99999），未开始暂存。" }
+    return $day + '.' + ($highest + 1).ToString('D5', [Globalization.CultureInfo]::InvariantCulture)
+}
+
+function SaveTagRefs {
+    # Only publish numbered saves reachable from the branch being uploaded.
+    $tags = (Git -GitArgs @('tag', '--list', '--merged', 'HEAD')).Text -split '\r?\n'
+    return @($tags | Where-Object { $_ -match '^\d{4}\.\d{2}\.\d{2}\.\d{5}$' } |
+        ForEach-Object { 'refs/tags/' + $_ + ':refs/tags/' + $_ })
+}
+
 try {
     $actualRoot = (Git -GitArgs @('rev-parse', '--show-toplevel')).Text.Trim()
     if ([IO.Path]::GetFullPath($actualRoot).TrimEnd('\', '/') -ne $script:RepoRoot.TrimEnd('\', '/')) {
@@ -199,6 +230,7 @@ try {
         }
         if (@(StagedFiles).Count) { throw '检查后暂存区发生变化，已停止。' }
         if ((Git -GitArgs @('symbolic-ref', '--quiet', '--short', 'HEAD')).Text.Trim() -ne $branch) { throw '检查后分支发生变化，已停止。' }
+        $saveNumber = New-SaveNumber -IncludeRemote:($Mode -eq 'SaveAndPush')
         Assert-Unchanged $snapshot
         [void](Git -GitArgs @('add', '--all', '--', '.'))
         $actualStaged = @(StagedFiles)
@@ -207,16 +239,21 @@ try {
         }
         Assert-Unchanged $snapshot -AfterStaging
         if ((Git -GitArgs @('symbolic-ref', '--quiet', '--short', 'HEAD')).Text.Trim() -ne $branch) { throw '暂存后分支发生变化，未提交，暂存内容已保留。' }
-        $commit = Git -GitArgs @('commit', '-m', $Message)
+        $commit = Git -GitArgs @('commit', '-m', "[$saveNumber] $Message")
         Write-Host $commit.Text
-        Write-Host "本地保存完成：$((Git -GitArgs @('rev-parse', '--short', 'HEAD')).Text.Trim())"
+        $savedHash = (Git -GitArgs @('rev-parse', 'HEAD')).Text.Trim()
+        $tagResult = Git -GitArgs @('tag', $saveNumber, $savedHash) -AllowFailure
+        if ($tagResult.Code -ne 0) { throw "提交已保存在本机（$savedHash），但编号标签 $saveNumber 创建失败，请人工检查。`n$($tagResult.Error)" }
+        Write-Host "本地保存完成，保存编号：$saveNumber" -ForegroundColor Green
     }
     else { Write-Host '没有新的文件变化，本地提交保持不变。' }
     if ($Mode -eq 'SaveAndPush') {
         if (!$paths.Count -and !$Yes -and (Read-Host "确认上传当前分支 $branch 的已有提交？输入 Y 确认") -notmatch '^(y|yes)$') { exit 0 }
         if ((Git -GitArgs @('symbolic-ref', '--quiet', '--short', 'HEAD')).Text.Trim() -ne $branch) { throw '上传前分支发生变化，已停止。' }
-        $push = Git -GitArgs @('push', '--set-upstream', $Remote, "HEAD:refs/heads/$branch") -AllowFailure
-        if ($push.Code -ne 0) { throw "上传失败，本地提交仍然保留。不会强制覆盖远程。`n$($push.Error)" }
+        $tagRefs = @(SaveTagRefs)
+        $pushArgs = @('push', '--atomic', '--set-upstream', $Remote, "HEAD:refs/heads/$branch") + $tagRefs
+        $push = Git -GitArgs $pushArgs -AllowFailure
+        if ($push.Code -ne 0) { throw "上传失败，本地提交和编号仍然保留。请检查远程分支或同名编号冲突，脚本不会覆盖远程。`n$($push.Error)" }
         Write-Host $push.Text
         Write-Host $push.Error
         Write-Host '上传完成。'
