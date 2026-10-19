@@ -1,0 +1,71 @@
+{
+  "archivedOn": "2026-10-19",
+  "entries": [
+    {
+      "source": "OptimizationReview/fix-sky.cjs",
+      "archive": "fix-sky.cjs",
+      "bytes": 9726,
+      "sha256": "71054b5cfb990d8cfdf21930b27e63ffc317ede590375f120159f321ecc19f94"
+    },
+    {
+      "source": "OptimizationReview/prepare-validation.cjs",
+      "archive": "prepare-validation.cjs",
+      "bytes": 1716,
+      "sha256": "3a18269ebb58b2336163a46a197ef61d417e43756303bf8281823d48beeb9c71"
+    },
+    {
+      "source": "OptimizationReview/repair-preview-lights.cjs",
+      "archive": "repair-preview-lights.cjs",
+      "bytes": 1156,
+      "sha256": "a11bc81a8cb03fa88d6d2d845628e41f1e9712b640fb082fc9973366a0fb5ac0"
+    },
+    {
+      "source": "OptimizationReview/stage-validation.cjs",
+      "archive": "stage-validation.cjs",
+      "bytes": 424,
+      "sha256": "0508f2ff341149bf4508b187011d59568f8434c8f2129dbf151686f7de8ef68d"
+    },
+    {
+      "source": "OptimizationReview/tune-lighting-contrast.cjs",
+      "archive": "tune-lighting-contrast.cjs",
+      "bytes": 2792,
+      "sha256": "6f4e63a60d079b1b7a2aa587867d9434ebe2cb4bd8bced2e7d55692402a91806"
+    },
+    {
+      "source": "OptimizationReview/update-materials.cjs",
+      "archive": "update-materials.cjs",
+      "bytes": 7234,
+      "sha256": "15a4cc1c89614eaf8e54fd46313dcdd9868c0377b8f77238d1f1a53a59203e85"
+    },
+    {
+      "source": "OptimizationReview/update-scene.cjs",
+      "archive": "update-scene.cjs",
+      "bytes": 3439,
+      "sha256": "bd17adbb0c34e8417c0f911a416aaec761600e32811e58fa44b5d8e1990d5e5a"
+    },
+    {
+      "source": "OptimizationReview/verify-lighting-isolation.cjs",
+      "archive": "verify-lighting-isolation.cjs",
+      "bytes": 2393,
+      "sha256": "2b2bf3332dbe34496a1179aad04e86681cfaa4946471fd9476b882b027054e85"
+    },
+    {
+      "source": "OptimizationReview/verify-lighting.cjs",
+      "archive": "verify-lighting.cjs",
+      "bytes": 2298,
+      "sha256": "5e3d58e4c1feff49bd2e6123d60c6a8dbf5ac97f3180a706346fc25c5e5f97f9"
+    },
+    {
+      "source": "OptimizationReview/verify-static.cjs",
+      "archive": "verify-static.cjs",
+      "bytes": 3203,
+      "sha256": "1436ddd352825ce08b319ea574260264dceb853b6ea4ca9b3b1fab6ec1cb3b9c"
+    },
+    {
+      "source": "OptimizationReview/README.md (before 2026-10-19 tooling update)",
+      "archive": "README-original-2026-10-10.md",
+      "bytes": 3377,
+      "sha256": "8576b82ed6d328233894105227bd17c740344c55b2dfea88f872ca687042c386"
+    }
+  ]
+}

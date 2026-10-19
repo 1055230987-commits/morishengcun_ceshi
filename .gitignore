@@ -62,7 +62,36 @@ crashlytics-build.properties
 
 # Analysis / review artefacts: generated reports, backup folders and
 # copied managed DLLs. Reproducible, not source.
-/OptimizationReview/
+# Maintained helpers and exact historical script archives live under /Tools/.
+# Legacy loose .cjs files here remain ignored; see Tools/Validation/README.md.
+#
+# 【这条规则改过 —— 原写法会把测试源码也挡在库外】
+# 原先是直接排除整个目录：/OptimizationReview/
+# 于是 check_*.py 和两个测试工程（约 2600 条断言）都不受版本控制，
+# 换一台机器就全没了。而"代码还在、但没有任何东西能证明它还对"
+# 比丢资产更难察觉 —— 所以测试源码必须入库。
+#
+# 注意 Git 的规则：父目录被排除时，内部任何取反（!）都不生效。
+# 所以不能"排除整目录再放行子目录"，只能排除"目录下的每一项"再逐项放行。
+/OptimizationReview/*
+!/OptimizationReview/README.md
+!/OptimizationReview/*.py
+
+# 维护中的测试工程（源码）。其余子目录（backup-* / *-backup-* / validation）
+# 合计约 53 MB 的历史快照，继续保持排除。
+!/OptimizationReview/StairSnapChecks/
+!/OptimizationReview/SkyMathChecks/
+
+# 测试工程的构建产物仍然排除（必须写在目录放行之后才生效）
+/OptimizationReview/StairSnapChecks/bin/
+/OptimizationReview/StairSnapChecks/obj/
+/OptimizationReview/SkyMathChecks/bin/
+/OptimizationReview/SkyMathChecks/obj/
+
+# 覆盖上面的全局 "*.csproj" 规则：测试工程的工程文件必须入库，
+# 否则换机器 .csproj 缺失，剩下的 .cs 无法编译，测试等于没有。
+!/OptimizationReview/StairSnapChecks/*.csproj
+!/OptimizationReview/SkyMathChecks/*.csproj
 
 # ============================================================
 #  Third-party extracted assets
